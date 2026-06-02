@@ -1,5 +1,11 @@
-[NIXPACKS_BUILD_CMD]
-cmd = "pip install -r requirements.txt && playwright install chromium --with-deps"
+[phases.setup]
+nixPkgs = ["python312", "chromium", "nss", "nspr", "alsa-lib", "atk", "cups", "dbus", "expat", "libdrm", "libxkbcommon", "mesa", "pango", "xorg.libX11", "xorg.libXcomposite", "xorg.libXdamage", "xorg.libXext", "xorg.libXfixes", "xorg.libXrandr", "xorg.libxcb"]
 
-[NIXPACKS_START_CMD]
+[phases.install]
+cmds = [
+  "pip install -r requirements.txt",
+  "playwright install chromium"
+]
+
+[start]
 cmd = "python main.py"

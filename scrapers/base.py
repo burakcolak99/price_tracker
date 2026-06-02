@@ -53,7 +53,7 @@ def get_soup(url: str, wait_selector: str = None, scroll: bool = True):
 
             html = page.content()
             browser.close()
-            return BeautifulSoup(html, "lxml")
+            return BeautifulSoup(html, "html.parser")
     except Exception as e:
         logger.error(f"Playwright hatasi [{url}]: {e}")
         return None

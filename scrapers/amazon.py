@@ -3,34 +3,25 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Amazon TR RAM kategorisi
 BASE_URL = "https://www.amazon.com.tr/s?k=ram+bellek&i=computers&rh=n%3A12466490031&page={}"
 PAGES = 3
 
 def scrape() -> list[dict]:
     products = []
     for page in range(1, PAGES + 1):
-        soup = get_soup(BASE_URL.format(page), extra_headers={
-            "Accept-Language": "tr-TR,tr;q=0.9"
-        })
+        soup = get_soup(BASE_URL.format(page), wait_selector="div[data-component-type='s-search-result']")
         if not soup:
             continue
-
         cards = soup.select("div[data-component-type='s-search-result']")
         if not cards:
-            logger.debug(f"Amazon sayfa {page}: kart bulunamadı")
             break
-
         for card in cards:
             try:
                 a_tag    = card.select_one("a.a-link-normal.s-no-outline")
                 href     = a_tag["href"] if a_tag else None
                 full_url = f"https://www.amazon.com.tr{href}" if href else None
-
-                name_el  = card.select_one("span.a-text-normal") or \
-                           card.select_one("h2 span")
+                name_el  = card.select_one("span.a-text-normal") or card.select_one("h2 span")
                 name     = name_el.get_text(strip=True) if name_el else "?"
-
                 whole    = card.select_one("span.a-price-whole")
                 fraction = card.select_one("span.a-price-fraction")
                 if whole:
@@ -39,17 +30,9 @@ def scrape() -> list[dict]:
                     price = float(f"{raw}.{frac}")
                 else:
                     price = None
-
                 if price and full_url:
-                    products.append({
-                        "id":    href,
-                        "name":  name,
-                        "price": price,
-                        "url":   full_url,
-                        "site":  "amazon",
-                    })
+                    products.append({"id": href, "name": name, "price": price, "url": full_url, "site": "amazon"})
             except Exception as e:
-                logger.debug(f"Amazon kart hatası: {e}")
-
-    logger.info(f"Amazon: {len(products)} ürün bulundu.")
+                logger.debug(f"Amazon kart hatasi: {e}")
+    logger.info(f"Amazon: {len(products)} urun bulundu.")
     return products

@@ -14,15 +14,25 @@ def scrape() -> list[dict]:
             continue
         cards = soup.select("div.p-card-wrppr")
         if not cards:
-            break
+            logger.debug(f"Trendyol sayfa {page}: kart bulunamadi")
+            # İlk sayfada bulunamazsa alternatif selector dene
+            cards = soup.select("div[class*='product-card']") or soup.select("div[class*='prdct']")
+        if not cards:
+            logger.debug(f"Trendyol sayfa {page}: alternatif selector da bulunamadi")
+            continue
         for card in cards:
             try:
                 a_tag    = card.select_one("a")
                 href     = a_tag["href"] if a_tag else None
                 full_url = f"https://www.trendyol.com{href}" if href else None
-                name_el  = card.select_one("span.prdct-desc-cntnr-name") or card.select_one("h3")
+                name_el  = (card.select_one("span.prdct-desc-cntnr-name") or
+                            card.select_one("span[class*='name']") or
+                            card.select_one("h3") or
+                            card.select_one("[class*='title']"))
                 name     = name_el.get_text(strip=True) if name_el else "?"
-                price_el = card.select_one("div.prc-box-dscntd") or card.select_one("div.prc-box-orgnl")
+                price_el = (card.select_one("div.prc-box-dscntd") or
+                            card.select_one("div.prc-box-orgnl") or
+                            card.select_one("[class*='price']"))
                 price    = parse_price(price_el.get_text()) if price_el else None
                 if price and full_url:
                     products.append({"id": href, "name": name, "price": price, "url": full_url, "site": "trendyol"})

@@ -14,15 +14,29 @@ def scrape() -> list[dict]:
             continue
         cards = soup.select("div.product-list--item")
         if not cards:
-            break
+            cards = (soup.select("div[class*='product-list']") or
+                     soup.select("div[class*='product-item']") or
+                     soup.select("div[class*='product-card']"))
+        if not cards:
+            logger.debug(f"Vatanbilgisayar sayfa {page}: kart bulunamadi")
+            continue
         for card in cards:
             try:
                 a_tag    = card.select_one("a")
                 href     = a_tag["href"] if a_tag else None
-                full_url = f"https://www.vatanbilgisayar.com{href}" if href else None
-                name_el  = card.select_one("span.product-list--title")
+                if href and not href.startswith("http"):
+                    full_url = f"https://www.vatanbilgisayar.com{href}"
+                else:
+                    full_url = href
+                name_el  = (card.select_one("span.product-list--title") or
+                            card.select_one("[class*='title']") or
+                            card.select_one("[class*='name']") or
+                            card.select_one("h3") or
+                            card.select_one("h2"))
                 name     = name_el.get_text(strip=True) if name_el else "?"
-                price_el = card.select_one("span.product-list--price") or card.select_one("div.product-list--price")
+                price_el = (card.select_one("span.product-list--price") or
+                            card.select_one("div.product-list--price") or
+                            card.select_one("[class*='price']"))
                 price    = parse_price(price_el.get_text()) if price_el else None
                 if price and full_url:
                     products.append({"id": href, "name": name, "price": price, "url": full_url, "site": "vatanbilgisayar"})

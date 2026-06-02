@@ -12,17 +12,27 @@ def scrape() -> list[dict]:
         soup = get_soup(BASE_URL.format(page), wait_selector="div.product-item")
         if not soup:
             continue
-        cards = soup.select("div.product-item") or soup.select("div.col.product")
+        cards = (soup.select("div.product-item") or
+                 soup.select("div.col.product") or
+                 soup.select("[class*='product-item']") or
+                 soup.select("[class*='product-card']"))
         if not cards:
-            break
+            logger.debug(f"Itopya sayfa {page}: kart bulunamadi")
+            continue
         for card in cards:
             try:
                 a_tag    = card.select_one("a.product-name") or card.select_one("a")
                 href     = a_tag["href"] if a_tag else None
                 full_url = href if href and href.startswith("http") else f"https://www.itopya.com{href}"
-                name_el  = card.select_one("a.product-name") or card.select_one("div.product-title")
+                name_el  = (card.select_one("a.product-name") or
+                            card.select_one("div.product-title") or
+                            card.select_one("[class*='product-name']") or
+                            card.select_one("[class*='title']") or
+                            card.select_one("h3"))
                 name     = name_el.get_text(strip=True) if name_el else "?"
-                price_el = card.select_one("span.product-price") or card.select_one("div.price")
+                price_el = (card.select_one("span.product-price") or
+                            card.select_one("div.price") or
+                            card.select_one("[class*='price']"))
                 price    = parse_price(price_el.get_text()) if price_el else None
                 if price and full_url:
                     products.append({"id": href, "name": name, "price": price, "url": full_url, "site": "itopya"})

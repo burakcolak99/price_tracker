@@ -4,17 +4,19 @@ from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
 logger = logging.getLogger(__name__)
 
-# Chromium'u runtime'da kur (Railway build/runtime container farklı olduğu için)
+# Sistem bağımlılıklarını ve Chromium'u runtime'da kur
 try:
-    result = subprocess.run(
-        [sys.executable, "-m", "playwright", "install", "chromium"],
-        check=True,
-        capture_output=True,
-        text=True,
+    subprocess.run(
+        [sys.executable, "-m", "playwright", "install-deps", "chromium"],
+        check=True, capture_output=True, text=True
     )
-    logger.info("Chromium kurulumu tamamlandi.")
+    subprocess.run(
+        [sys.executable, "-m", "playwright", "install", "chromium"],
+        check=True, capture_output=True, text=True
+    )
+    logger.info("Chromium ve sistem bağımlılıkları kuruldu.")
 except Exception as e:
-    logger.warning(f"Chromium install uyarisi: {e}")
+    logger.warning(f"Chromium kurulum uyarisi: {e}")
 
 
 def get_soup(url: str, wait_selector: str = None, scroll: bool = True):

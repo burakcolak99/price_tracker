@@ -1,0 +1,5 @@
+[NIXPACKS_BUILD_CMD]
+cmd = "pip install -r requirements.txt && playwright install chromium --with-deps"
+
+[NIXPACKS_START_CMD]
+cmd = "python main.py"

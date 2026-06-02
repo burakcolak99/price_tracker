@@ -1,7 +1,7 @@
 import os
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN")
-TELEGRAM_CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID",   "YOUR_CHAT_ID")
+TELEGRAM_CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID",   "6446387699")
 
 # Kaç dakikada bir kontrol (ücretsiz sunucu için 60+ önerilir)
 CHECK_INTERVAL_MINUTES = 60

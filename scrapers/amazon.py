@@ -3,7 +3,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-BASE_URL = "https://www.amazon.com.tr/s?k=ram+bellek&rh=n%3A12466490031&page={}"
+# Amazon TR RAM kategorisi
+BASE_URL = "https://www.amazon.com.tr/s?k=ram+bellek&i=computers&rh=n%3A12466490031&page={}"
 PAGES = 3
 
 def scrape() -> list[dict]:
@@ -17,6 +18,7 @@ def scrape() -> list[dict]:
 
         cards = soup.select("div[data-component-type='s-search-result']")
         if not cards:
+            logger.debug(f"Amazon sayfa {page}: kart bulunamadı")
             break
 
         for card in cards:

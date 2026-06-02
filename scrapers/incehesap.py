@@ -3,7 +3,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-BASE_URL = "https://www.incehesap.com/ram-bellek/?sayfa={}"
+# İncehesap RAM fiyatları karşılaştırma sayfası
+BASE_URL = "https://www.incehesap.com/ram-fiyatlari/?sayfa={}"
 PAGES = 3
 
 def scrape() -> list[dict]:
@@ -15,6 +16,7 @@ def scrape() -> list[dict]:
 
         cards = soup.select("div.product-card")
         if not cards:
+            logger.debug(f"İncehesap sayfa {page}: kart bulunamadı")
             break
 
         for card in cards:

@@ -1,10 +1,23 @@
-import re, logging, time, random
+import re, logging, time, random, subprocess, sys
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
 logger = logging.getLogger(__name__)
 
-def get_soup(url: str, wait_selector: str = None, scroll: bool = True) -> BeautifulSoup | None:
+# Chromium'u runtime'da kur (Railway build/runtime container farklı olduğu için)
+try:
+    result = subprocess.run(
+        [sys.executable, "-m", "playwright", "install", "chromium"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    logger.info("Chromium kurulumu tamamlandi.")
+except Exception as e:
+    logger.warning(f"Chromium install uyarisi: {e}")
+
+
+def get_soup(url: str, wait_selector: str = None, scroll: bool = True):
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(
@@ -42,6 +55,7 @@ def get_soup(url: str, wait_selector: str = None, scroll: bool = True) -> Beauti
     except Exception as e:
         logger.error(f"Playwright hatasi [{url}]: {e}")
         return None
+
 
 def parse_price(text: str) -> float | None:
     if not text:
